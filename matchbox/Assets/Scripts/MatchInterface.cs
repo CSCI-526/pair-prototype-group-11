@@ -4,6 +4,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 interface IMatchInterface
-{
-    public string GetColor();
+{ 
+    public string Color { get; set; }
 }
