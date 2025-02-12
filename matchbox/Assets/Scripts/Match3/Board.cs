@@ -12,8 +12,8 @@ public sealed class Board : MonoBehaviour
     public Box[,] Boxes{get; private set;}
     
 
-    public int Width => Boxes.GetLength(0);
-    public int Height => Boxes.GetLength(1);
+    public int no_of_rows => Boxes.GetLength(0);
+    public int no_of_cols => Boxes.GetLength(1);
 
     
 
@@ -21,16 +21,16 @@ public sealed class Board : MonoBehaviour
 
     private void Awake() => Instance = this;
     
-    private void Start()
+    void Start()
     {
         Boxes = new Box[rows.Max(row => row.boxes.Length), rows.Length];
-        Debug.Log(Boxes.Length);
-        for (var j=0; j< Height; j++)
+     
+        for (var i=0; i< no_of_rows; i++)
         {
-            for (var i=0; i< Width; i++)
+            for (var j=0; j< no_of_cols; j++)
             {
 
-                var box = rows[j].boxes[i];
+                var box = rows[i].boxes[j];
 
                 box.x_coord = i;
                 box.y_coord = j;
@@ -45,6 +45,24 @@ public sealed class Board : MonoBehaviour
 
 
         
+    }
+
+    private Box _selectedBox1, _selectedBox2;
+   /* public void SelectBox(Box box)
+    {
+        if (_selectedBox1 == null || _selectedBox2 == null) return;
+
+    
+        Debug.Log("Selected Box1: " + _selectedBox1.x_coord + " " + _selectedBox1.y_coord);
+        Debug.Log("Selected Box2: " + _selectedBox2.x_coord + " " + _selectedBox2.y_coord);
+        _selectedBox1.Clear();
+        _selectedBox2.Clear();
+
+    }*/
+
+    public void Swap(Box box1, Box box2)
+    {
+
     }
 
     // Update is called once per frame

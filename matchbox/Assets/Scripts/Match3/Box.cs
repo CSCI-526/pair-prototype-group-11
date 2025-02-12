@@ -22,6 +22,15 @@ public sealed class Box : MonoBehaviour
     public Button button;
     public Image arrow;
 
+/*   void Start()
+    {
+        button.onClick.AddListener(() =>
+            {
+                Board.Instance.SelectBox(this);
+            }
+        );
+    }
+*/
 
 
 
