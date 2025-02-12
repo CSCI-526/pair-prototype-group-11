@@ -35,7 +35,10 @@ public sealed class Board : MonoBehaviour
                 box.x_coord = i;
                 box.y_coord = j;
 
-                box.Icon = IconDb.Icons[Random.Range(0, IconDb.Icons.Length)];
+                int index = Random.Range(0, IconDb.Icons.Length);
+                
+                box.Icon = IconDb.Icons[index];
+                box.Color = index.ToString();
                 Boxes[i,j] = box;
 
 

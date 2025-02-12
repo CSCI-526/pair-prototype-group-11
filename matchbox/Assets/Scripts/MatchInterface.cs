@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-interface IMatchInterface
+public interface IMatchInterface
 { 
     public string Color { get; set; }
 }
