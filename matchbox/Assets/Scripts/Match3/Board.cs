@@ -43,12 +43,10 @@ public sealed class Board : MonoBehaviour
             }
         }
 
-
-
         
     }
 
-    private Box _selectedBox1, _selectedBox2;
+    private Box _selectedBox1, _selectedBox2, tempBox2;
     public async void SelectBox(Box box)
     {
        
@@ -58,8 +56,20 @@ public sealed class Board : MonoBehaviour
             return;
         }
 
+        // checking the box is already selected
         if (_selectedBox2 == null && box!= _selectedBox1 )
         {
+            tempBox2 = box;
+            //checking neighbouring condition of box
+            int x_diff = Mathf.Abs(_selectedBox1.x_coord - tempBox2.x_coord);
+            int y_diff = Mathf.Abs(_selectedBox1.y_coord - tempBox2.y_coord);
+
+            if (x_diff + y_diff != 1)
+            {
+                _selectedBox1 = tempBox2;
+                return;
+            }
+            
             _selectedBox2= box;
            
         }
@@ -113,7 +123,6 @@ public sealed class Board : MonoBehaviour
     await Task.Delay(10); 
 }
 
-    // Update is called once per frame
     void Update()
     {
         
