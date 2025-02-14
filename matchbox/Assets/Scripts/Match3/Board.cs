@@ -34,6 +34,8 @@ public sealed class Board : MonoBehaviour
                 box.x_coord = i;
                 box.y_coord = j;
 
+                Debug.Log("Box: " + i + " " + j);
+
                 do
                 { int index = Random.Range(0, IconDb.Icons.Length);
                 
@@ -146,12 +148,6 @@ public sealed class Board : MonoBehaviour
     box2.Icon = tempIcon;
 
 
-    var tempx_coord = box1.x_coord;
-    var tempy_coord = box1.y_coord;
-    box1.x_coord = box2.x_coord;
-    box1.y_coord = box2.y_coord;
-    box2.x_coord = tempx_coord;
-    box2.y_coord = tempy_coord;
 
 
     await Task.Delay(10); 

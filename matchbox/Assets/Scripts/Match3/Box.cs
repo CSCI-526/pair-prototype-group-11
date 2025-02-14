@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public sealed class Box : MonoBehaviour, IMatchInterface
 {
-    public int y_coord;
     public int x_coord;
+    public int y_coord;
+   
 
     public string Color { get; set; }
     
@@ -28,6 +29,10 @@ public sealed class Box : MonoBehaviour, IMatchInterface
     {
         button.onClick.AddListener(() =>
             {
+
+                Board.Instance.SelectBox(this);
+               
+
                 MatchingAlgo.Index Index;
                 Index.X = x_coord;
                 Index.Y = y_coord;
@@ -35,6 +40,7 @@ public sealed class Box : MonoBehaviour, IMatchInterface
                 List<IMatchInterface> Boxes = new List<IMatchInterface>();
 
                 Debug.Log(MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes));
+
             }
         );
     }
