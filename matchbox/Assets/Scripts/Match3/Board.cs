@@ -136,18 +136,27 @@ public sealed class Board : MonoBehaviour
     bool box1_Match= MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes);
     Debug.Log(box1_Match);
     
+    for (int i=0; i<Indexes.Count; i++ )
+        Debug.Log(Indexes[i].X+" "+ Indexes[i].Y );
+
+
+    Debug.Log("Matches with box 2");
     MatchingAlgo.Index Index2;
     Index2.X = box2.x_coord;
     Index2.Y = box2.y_coord;
     List<MatchingAlgo.Index> Indexes2 = new List<MatchingAlgo.Index>();
     List<IMatchInterface> Boxes2 = new List<IMatchInterface>();
     bool box2_Match= MatchingAlgo.CheckMatch(Index2, Board.Instance.Boxes, ref Indexes2, ref Boxes2);
+    
+    for (int i=0; i<Indexes2.Count; i++ )
+        Debug.Log(Indexes2[i].X+" "+ Indexes2[i].Y );
     Debug.Log( box2_Match);
     if (!box1_Match && !box2_Match)
     {
         await Task.Delay(500);
         await BoxSwapMechanic(box1, box2);// swaps back if no match
     }
+
 
 
 
@@ -182,6 +191,8 @@ public sealed class Board : MonoBehaviour
     box1.Icon = box2.Icon;
     box2.Icon = tempIcon;
     }
+
+
 
     void Update()
     {
