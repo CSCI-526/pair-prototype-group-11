@@ -28,6 +28,7 @@ public sealed class Box : MonoBehaviour
         button.onClick.AddListener(() =>
             {
                 Board.Instance.SelectBox(this);
+                
             }
         );
     }
