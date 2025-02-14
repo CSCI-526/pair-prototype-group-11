@@ -37,8 +37,12 @@ public sealed class Board : MonoBehaviour
                 Debug.Log("Box: " + i + " " + j);
 
                 do
-                { box.Icon = IconDb.Icons[Random.Range(0, IconDb.Icons.Length)];
+                { int index = Random.Range(0, IconDb.Icons.Length);
+                
+                   box.Icon = IconDb.Icons[index];
+                   box.Color = index.ToString();
                 } while (HasImmediateMatch(i, j, box.Icon));
+
                 Boxes[i,j] = box;
 
 
