@@ -11,8 +11,6 @@ public sealed class Board : MonoBehaviour
 
     public Row[] rows;
     public Box[,] Boxes{get; private set;}
-    
-
     public int no_of_rows => Boxes.GetLength(0);
     public int no_of_cols => Boxes.GetLength(1);
 
@@ -36,7 +34,9 @@ public sealed class Board : MonoBehaviour
                 box.x_coord = i;
                 box.y_coord = j;
 
-                box.Icon = IconDb.Icons[Random.Range(0, IconDb.Icons.Length)];
+                do
+                { box.Icon = IconDb.Icons[Random.Range(0, IconDb.Icons.Length)];
+                } while (HasImmediateMatch(i, j, box.Icon));
                 Boxes[i,j] = box;
 
 
@@ -46,10 +46,40 @@ public sealed class Board : MonoBehaviour
         
     }
 
+    private bool HasImmediateMatch(int x, int y, Icon icon)
+    {
+        return CheckMatch(x, y, icon, 1, 0) || // check horizontal
+            CheckMatch(x, y, icon, 0, 1);  // check vertical
+    }
+
+    private int CountMatches(int x, int y, Icon icon, int dx, int dy, int count = 0)
+    {
+        int curr_x = x + dx;
+        int curr_y = y + dy;
+
+        if (curr_x < 0 || curr_x >= no_of_rows || curr_y < 0 || curr_y >= no_of_cols || Boxes[curr_x, curr_y]?.Icon != icon)// end search if any are true
+            return count;
+        
+        return CountMatches(curr_x, curr_y, icon, dx, dy, count + 1); //recursively search for matches
+    }
+
+    private bool CheckMatch(int x, int y, Icon icon, int dx, int dy)
+    {
+      
+        int forward = CountMatches(x, y, icon, dx, dy);
+        int backward = CountMatches(x, y, icon, -dx, -dy);
+
+        //including the current box
+        int totalCount = backward + forward + 1;
+
+        return totalCount >= 3; //returns true if there are 3 or more matches
+        //total count can be used for powerup if needed
+    }
+
+
     private Box _selectedBox1, _selectedBox2, tempBox2;
     public async void SelectBox(Box box)
     {
-       
         if (_selectedBox1 == null && _selectedBox1!= box)
         {
             _selectedBox1= box;
