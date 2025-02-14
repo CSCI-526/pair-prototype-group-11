@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public sealed class Box : MonoBehaviour
 {
-    public int y_coord;
     public int x_coord;
+    public int y_coord;
+   
 
     private Icon _icon;
     public Icon Icon
