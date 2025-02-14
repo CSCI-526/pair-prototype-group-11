@@ -22,7 +22,7 @@ public sealed class Box : MonoBehaviour
     public Button button;
     public Image arrow;
 
-/*   void Start()
+   void Start()
     {
         button.onClick.AddListener(() =>
             {
@@ -30,7 +30,7 @@ public sealed class Box : MonoBehaviour
             }
         );
     }
-*/
+
 
 
 
