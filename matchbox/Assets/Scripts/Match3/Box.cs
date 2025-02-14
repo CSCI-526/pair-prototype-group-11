@@ -29,18 +29,7 @@ public sealed class Box : MonoBehaviour, IMatchInterface
     {
         button.onClick.AddListener(() =>
             {
-
                 Board.Instance.SelectBox(this);
-               
-
-                MatchingAlgo.Index Index;
-                Index.X = x_coord;
-                Index.Y = y_coord;
-                List<MatchingAlgo.Index> Indexes = new List<MatchingAlgo.Index>();
-                List<IMatchInterface> Boxes = new List<IMatchInterface>();
-
-                Debug.Log(MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes));
-
             }
         );
     }

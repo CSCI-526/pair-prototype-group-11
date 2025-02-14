@@ -142,12 +142,30 @@ public sealed class Board : MonoBehaviour
     arrow1Transform.SetParent(box2.transform);
     arrow2Transform.SetParent(box1.transform);
 
+    var tempColor = box1.Color;
+    box1.Color = box2.Color;
+    box2.Color = tempColor;
+
 
     var tempIcon = box1.Icon;
     box1.Icon = box2.Icon;
     box2.Icon = tempIcon;
 
+    MatchingAlgo.Index Index;
+    Index.X = box1.x_coord;
+    Index.Y = box1.y_coord;
+    List<MatchingAlgo.Index> Indexes = new List<MatchingAlgo.Index>();
+    List<IMatchInterface> Boxes = new List<IMatchInterface>();
 
+    Debug.Log(MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes));
+    
+    MatchingAlgo.Index Index2;
+    Index2.X = box2.x_coord;
+    Index2.Y = box2.y_coord;
+    List<MatchingAlgo.Index> Indexes2 = new List<MatchingAlgo.Index>();
+    List<IMatchInterface> Boxes2 = new List<IMatchInterface>();
+
+    Debug.Log(MatchingAlgo.CheckMatch(Index2, Board.Instance.Boxes, ref Indexes2, ref Boxes2));
 
 
     await Task.Delay(10); 
