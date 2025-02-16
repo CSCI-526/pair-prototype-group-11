@@ -36,8 +36,6 @@ public class MatchingAlgo
             IMatchInterface startingBox = board[startingIndex.X, startingIndex.Y];
             string Color = startingBox.Color;
 
-            indexes.Add(startingIndex);
-            elements.Add(startingBox);
 
             // we only need to look for matches across each of the two cases X and Y rows
             // I am extremely tempted to write a for loop to do this bc I'm a psychopath, but let's do this normally once
