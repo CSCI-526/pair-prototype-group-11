@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
+using Random = UnityEngine.Random;
 
 public sealed class Board : MonoBehaviour
 {
@@ -14,7 +16,8 @@ public sealed class Board : MonoBehaviour
     public int no_of_rows => Boxes.GetLength(0);
     public int no_of_cols => Boxes.GetLength(1);
 
-    
+    public AnimationCurve SwapCurve;
+    private float SwapTime = 1.0f;
 
 
 
@@ -126,7 +129,7 @@ public sealed class Board : MonoBehaviour
     public async Task SwapBoxes(Box box1, Box box2)
 {
 
-    BoxSwapMechanic(box1, box2); // initial swap
+    await BoxSwapMechanic(box1, box2); // initial swap
     MatchingAlgo.Index Index;
     Index.X = box1.x_coord;
     Index.Y = box1.y_coord;
@@ -174,13 +177,25 @@ public sealed class Board : MonoBehaviour
     var arrow1Transform = arrow1.transform;
     var arrow2Transform = arrow2.transform;
 
+    Transform TopTransform = box1.x_coord > box2.x_coord || box1.y_coord > box2.y_coord ? box1.transform : box2.transform;
+    
+    arrow1Transform.SetParent(TopTransform);
+    arrow2Transform.SetParent(TopTransform);
+    
+    StartCoroutine(SwapBoxesRoutine(arrow1Transform,arrow2Transform));
+    int time = Convert.ToInt32(SwapTime * 1000);
+    await Task.Delay(time);
+    
+    arrow1Transform.SetParent(box2.transform);
+    arrow2Transform.SetParent(box1.transform);
   
+    /*
     var tempPosition = arrow1Transform.position;
     arrow1Transform.position = arrow2Transform.position;
     arrow2Transform.position = tempPosition;
+    */
 
-    arrow1Transform.SetParent(box2.transform);
-    arrow2Transform.SetParent(box1.transform);
+    
 
     var tempColor = box1.Color;
     box1.Color = box2.Color;
@@ -251,6 +266,31 @@ public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List
     }
     await CheckForNewMatches();
 }
+
+IEnumerator SwapBoxesRoutine(Transform Box1, Transform Box2)
+    {
+        float elapsedTime = 0.0f;
+        
+        Vector3 Position1 = Box1.position;
+        Vector3 Position2 = Box2.position;
+
+        Position1.z = 5;
+        Position2.z = 5;
+        
+        while (elapsedTime <= SwapTime)
+        {
+            Box1.position = Vector3.Lerp(Position1,Position2,SwapCurve.Evaluate(elapsedTime / SwapTime));
+            Box2.position = Vector3.Lerp(Position2,Position1,SwapCurve.Evaluate(elapsedTime / SwapTime));
+            
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        Box1.position = Position2;
+        Box2.position = Position1;
+        
+        yield return null;
+    }
 
 private Box GenerateNewBox(int i, int j)
 {
