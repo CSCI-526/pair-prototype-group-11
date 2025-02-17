@@ -34,7 +34,7 @@ public sealed class Board : MonoBehaviour
                 box.x_coord = i;
                 box.y_coord = j;
 
-                Debug.Log("Box: " + i + " " + j);
+                //Debug.Log("Box: " + i + " " + j);
 
                 do
                 { int index = Random.Range(0, IconDb.Icons.Length);
@@ -131,30 +131,28 @@ public sealed class Board : MonoBehaviour
     Index.X = box1.x_coord;
     Index.Y = box1.y_coord;
     List<MatchingAlgo.Index> Indexes = new List<MatchingAlgo.Index>();
-    List<IMatchInterface> Boxes = new List<IMatchInterface>();
+    List<IMatchInterface> Boxes1 = new List<IMatchInterface>();
 
-    bool box1_Match= MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes);
-    Debug.Log(box1_Match);
-    
-    for (int i=0; i<Indexes.Count; i++ )
-        Debug.Log(Indexes[i].X+" "+ Indexes[i].Y );
+    bool box1_Match= MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes1);
 
-
-    Debug.Log("Matches with box 2");
     MatchingAlgo.Index Index2;
     Index2.X = box2.x_coord;
     Index2.Y = box2.y_coord;
     List<MatchingAlgo.Index> Indexes2 = new List<MatchingAlgo.Index>();
     List<IMatchInterface> Boxes2 = new List<IMatchInterface>();
     bool box2_Match= MatchingAlgo.CheckMatch(Index2, Board.Instance.Boxes, ref Indexes2, ref Boxes2);
+    Debug.Log("Box1 Match: " + box1_Match + " Box2 Match: " + box2_Match);
     
-    for (int i=0; i<Indexes2.Count; i++ )
-        Debug.Log(Indexes2[i].X+" "+ Indexes2[i].Y );
-    Debug.Log( box2_Match);
     if (!box1_Match && !box2_Match)
     {
         await Task.Delay(500);
         await BoxSwapMechanic(box1, box2);// swaps back if no match
+    }
+
+    if (Indexes.Count >= 3 || Indexes2.Count >= 3)
+    {
+        await Task.Delay(500);
+        PopulateDestroyedBoxes(Indexes, Indexes2);
     }
 
 
@@ -165,6 +163,8 @@ public sealed class Board : MonoBehaviour
 
     public async Task BoxSwapMechanic(Box box1, Box box2)
     {
+    
+    
     var arrow1 = box1.arrow;
     var arrow2 = box2.arrow;
 
@@ -190,8 +190,118 @@ public sealed class Board : MonoBehaviour
     var tempIcon = box1.Icon;
     box1.Icon = box2.Icon;
     box2.Icon = tempIcon;
+
+
+    Debug.Log("Swapped Boxes: " + box1.x_coord + " " + box1.y_coord +" color"+ box1.Color + " " + box2.x_coord + " " + box2.y_coord + "color"+ box2.Color);
+    
+
+
+
+
     }
 
+
+
+
+public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
+{
+    
+
+    var allIndexes= Indexes1.Concat(Indexes2).Distinct().ToList();
+    allIndexes = allIndexes.OrderByDescending(index => index.X).ToList();
+
+    foreach (var index in allIndexes)
+    {
+        int x = index.X;
+        int y = index.Y;
+
+       
+        Boxes[x, y].Color= null;
+    }
+
+    for (int y = 0; y < no_of_cols; y++)
+    {
+        bool checkFlag= true;
+        
+        while(checkFlag){
+            checkFlag= false;
+            for (int x = no_of_rows - 1; x >= 0; x--)
+            {
+                if (Boxes[x, y].Color == null)
+                {
+                    // Shift boxes  down
+                    for (int k = x; k > 0; k--)
+                    {
+                        if (Boxes[k - 1, y].Color != null)
+                        {
+                            
+                            await BoxSwapMechanic(rows[k].boxes[y], rows[k - 1].boxes[y]);
+            
+                            checkFlag= true;
+                        }
+                    }
+                    // Generate a new box at the top
+                    Boxes[0, y] = GenerateNewBox(0, y);
+                  
+                    
+                    
+                }
+            }
+        }
+    }
+    await CheckForNewMatches();
+}
+
+private Box GenerateNewBox(int i, int j)
+{
+
+    var newBox = rows[i].boxes[j];
+
+    newBox.x_coord = i;
+    newBox.y_coord = j;
+
+    Debug.Log("Created New Box: " + i + " " + j);
+
+    int index = Random.Range(0, IconDb.Icons.Length);
+    
+    newBox.Icon = IconDb.Icons[index];
+    newBox.Color = index.ToString();
+
+    return newBox;
+}
+
+public async Task CheckForNewMatches()
+{
+
+    for (int x = no_of_rows-1; x >=0; x--)
+    {
+        for (int y = no_of_cols-1; y >=0; y--)
+        {
+            MatchingAlgo.Index index;
+            index.X = x;
+            index.Y = y;
+
+            List<MatchingAlgo.Index> matchedIndexes = new List<MatchingAlgo.Index>();
+            List<IMatchInterface> matchedBoxes = new List<IMatchInterface>();
+
+            bool isMatch = MatchingAlgo.CheckMatch(index, Board.Instance.Boxes, ref matchedIndexes, ref matchedBoxes);
+
+            if (isMatch && matchedIndexes.Count >= 3)
+            {
+                Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
+                await Task.Delay(500);
+                PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>()); // recursive call
+                
+            }
+        }
+    }
+
+
+}
+
+
+
+   
 
 
     void Update()
