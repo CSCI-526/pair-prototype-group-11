@@ -232,7 +232,7 @@ public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List
                     // Shift boxes  down
                     for (int k = x; k > 0; k--)
                     {
-                        if (Boxes[k - 1, y] != null)
+                        if (Boxes[k - 1, y].Color != null)
                         {
                             
                             await BoxSwapMechanic(rows[k].boxes[y], rows[k - 1].boxes[y]);
@@ -249,6 +249,7 @@ public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List
             }
         }
     }
+    await CheckForNewMatches();
 }
 
 private Box GenerateNewBox(int i, int j)
@@ -268,6 +269,36 @@ private Box GenerateNewBox(int i, int j)
 
     return newBox;
 }
+
+public async Task CheckForNewMatches()
+{
+
+    for (int x = no_of_rows-1; x >=0; x--)
+    {
+        for (int y = no_of_cols-1; y >=0; y--)
+        {
+            MatchingAlgo.Index index;
+            index.X = x;
+            index.Y = y;
+
+            List<MatchingAlgo.Index> matchedIndexes = new List<MatchingAlgo.Index>();
+            List<IMatchInterface> matchedBoxes = new List<IMatchInterface>();
+
+            bool isMatch = MatchingAlgo.CheckMatch(index, Board.Instance.Boxes, ref matchedIndexes, ref matchedBoxes);
+
+            if (isMatch && matchedIndexes.Count >= 3)
+            {
+                Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
+                await Task.Delay(500);
+                PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>()); // recursive call
+                
+            }
+        }
+    }
+
+
+}
+
 
 
    
