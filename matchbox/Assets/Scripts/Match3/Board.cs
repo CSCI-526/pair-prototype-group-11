@@ -127,7 +127,7 @@ public sealed class Board : MonoBehaviour
     public async Task SwapBoxes(Box box1, Box box2)
 {
 
-    await BoxSwapMechanic(box1, box2); // initial swap
+    BoxSwapMechanic(box1, box2); // initial swap
     MatchingAlgo.Index Index;
     Index.X = box1.x_coord;
     Index.Y = box1.y_coord;
@@ -152,10 +152,12 @@ public sealed class Board : MonoBehaviour
         await BoxSwapMechanic(box1, box2);// swaps back if no match
     }
 
-    if(Indexes.Count>0 || Indexes2.Count>0)
+   /* if(Indexes.Count>0 || Indexes2.Count>0)
     {
         PopulateDestroyedBoxes(Indexes, Indexes2);
-    }
+    }*/
+
+    await Task.Delay(100);
 
 
 
@@ -185,16 +187,15 @@ public sealed class Board : MonoBehaviour
     var tempIcon = box1.Icon;
     box1.Icon = box2.Icon;
     box2.Icon = tempIcon;
-    await Task.Delay(1000);
+    await Task.Delay(10);
     Debug.Log("Swapped"+ box1.x_coord + " " + box1.y_coord + "and " + box2.x_coord + " " + box2.y_coord);
     }
 
-    public List<MatchingAlgo.Index> allIndexes;
 public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
 {
     
 
-    allIndexes= Indexes1.Concat(Indexes2).Distinct().ToList();
+    var allIndexes= Indexes1.Concat(Indexes2).Distinct().ToList();
     allIndexes = allIndexes.OrderByDescending(index => index.X).ToList();
 
     foreach (var index in allIndexes)
@@ -258,8 +259,8 @@ private Box GenerateNewBox(int i, int j)
 }
 
 
-    await Task.Delay(10); 
-}
+   
+
 
     void Update()
     {
