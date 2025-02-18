@@ -16,8 +16,10 @@ public sealed class Board : MonoBehaviour
     public int no_of_rows => Boxes.GetLength(0);
     public int no_of_cols => Boxes.GetLength(1);
 
+    public static string arrowColor;
     public AnimationCurve SwapCurve;
     private float SwapTime = 1.0f;
+
 
 
 
@@ -25,6 +27,7 @@ public sealed class Board : MonoBehaviour
     
     void Start()
     {
+        
         Boxes = new Box[rows.Max(row => row.boxes.Length), rows.Length];
      
         for (var i=0; i< no_of_rows; i++)
@@ -154,6 +157,11 @@ public sealed class Board : MonoBehaviour
 
     if (Indexes.Count >= 3 || Indexes2.Count >= 3)
     {
+        if (Indexes2.Count >= 3)
+            arrowColor= box2.Color;
+        if (Indexes.Count >= 3)    
+            arrowColor= box1.Color;
+       
         await Task.Delay(500);
         PopulateDestroyedBoxes(Indexes, Indexes2);
     }
@@ -194,8 +202,6 @@ public sealed class Board : MonoBehaviour
     arrow1Transform.position = arrow2Transform.position;
     arrow2Transform.position = tempPosition;
     */
-
-    
 
     var tempColor = box1.Color;
     box1.Color = box2.Color;
