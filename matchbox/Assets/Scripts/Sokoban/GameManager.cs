@@ -1,33 +1,42 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     private GameObject[] boxes;
-    private bool gameWin = false;
-
+    public GameObject winPanel;
+    public UnityEngine.UI.Button restartButton;
     void Start()
     {
+        if (restartButton != null)
+        {
+            restartButton.onClick.AddListener(RestartGame);
+        }
+        winPanel.SetActive(false);
         boxes = GameObject.FindGameObjectsWithTag("Box");
+        CheckLineMatches();
     }
 
     void Update()
     {
-        if (!gameWin)
+
+        if (GameObject.FindGameObjectsWithTag("Box").Length == 0)
         {
-            CheckLineMatches();
+            ShowWinPanel();
         }
     }
 
-    void CheckLineMatches()
+    public void CheckLineMatches()
     {
         boxes = GameObject.FindGameObjectsWithTag("Box");
         HashSet<GameObject> toRemove = new HashSet<GameObject>();
 
-        FindMatches(Vector2.right, toRemove);
-
-        FindMatches(Vector2.up, toRemove);
+        FindMatches(Vector2.left, toRemove);
+        FindMatches(Vector2.down, toRemove);
 
         if (toRemove.Count >= 3)
         {
@@ -36,6 +45,10 @@ public class GameManager : MonoBehaviour
                 Destroy(box);
             }
             Debug.Log("Boxes Removed: " + toRemove.Count);
+        }
+        if (GameObject.FindGameObjectsWithTag("Box").Length == 0)
+        {
+            ShowWinPanel();
         }
     }
 
@@ -46,7 +59,7 @@ public class GameManager : MonoBehaviour
         {
             Vector2 startPos = box.transform.position;
             List<GameObject> lineMatches = new List<GameObject> { box };
-
+            
             Vector2 currentPos = startPos + direction * distance;
             while (true)
             {
@@ -61,6 +74,9 @@ public class GameManager : MonoBehaviour
                     break;
                 }
             }
+            //Debug.Log(string.Join(", ", lineMatches.Select(box => box.name)));
+
+
 
             if (lineMatches.Count >= 3)
             {
@@ -70,5 +86,22 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+    }
+    private void ShowWinPanel()
+    {
+        Debug.Log("Win Panel Active: " + winPanel.activeSelf);
+
+        if (winPanel != null)
+        {
+            winPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("YOU WIN!");
+        }
+    }
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
