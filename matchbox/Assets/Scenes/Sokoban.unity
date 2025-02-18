@@ -583,7 +583,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   winPanel: {fileID: 2095676702}
-  restartButton: {fileID: 0}
+  restartButton: {fileID: 1335128421}
 --- !u!4 &281196264
 Transform:
   m_ObjectHideFlags: 0
