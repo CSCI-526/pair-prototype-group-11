@@ -17,8 +17,9 @@ public sealed class Board : MonoBehaviour
     public int no_of_cols => Boxes.GetLength(1);
 
     public AnimationCurve SwapCurve;
-    private float SwapTime = 1.0f;
+    [SerializeField] private float SwapTime = 0.5f;
 
+    
 
 
     private void Awake() => Instance = this;
@@ -155,7 +156,7 @@ public sealed class Board : MonoBehaviour
     if (Indexes.Count >= 3 || Indexes2.Count >= 3)
     {
         await Task.Delay(500);
-        PopulateDestroyedBoxes(Indexes, Indexes2);
+        await PopulateDestroyedBoxes(Indexes, Indexes2);
     }
 
 
@@ -218,7 +219,7 @@ public sealed class Board : MonoBehaviour
 
 
 
-public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
+public async Task PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
 {
     
 
@@ -230,41 +231,51 @@ public async void PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List
         int x = index.X;
         int y = index.Y;
 
-       
+        Boxes[x, y].arrow.enabled = false;
         Boxes[x, y].Color= null;
     }
 
+    Task[] Tasks = new Task[no_of_cols];
+    
     for (int y = 0; y < no_of_cols; y++)
     {
-        bool checkFlag= true;
+        Tasks[y] = BubbleDown(y);
+    }
+
+    await Task.WhenAll(Tasks);
+    
+    await CheckForNewMatches();
+}
+
+public async Task BubbleDown(int y)
+{
+    bool checkFlag= true;
         
-        while(checkFlag){
-            checkFlag= false;
-            for (int x = no_of_rows - 1; x >= 0; x--)
+    while(checkFlag){
+        checkFlag= false;
+        for (int x = no_of_rows - 1; x >= 0; x--)
+        {
+            if (Boxes[x, y].Color == null)
             {
-                if (Boxes[x, y].Color == null)
+                // Shift boxes  down
+                for (int k = x; k > 0; k--)
                 {
-                    // Shift boxes  down
-                    for (int k = x; k > 0; k--)
+                    if (Boxes[k - 1, y].Color != null)
                     {
-                        if (Boxes[k - 1, y].Color != null)
-                        {
                             
-                            await BoxSwapMechanic(rows[k].boxes[y], rows[k - 1].boxes[y]);
+                        await BoxSwapMechanic(rows[k].boxes[y], rows[k - 1].boxes[y]);
             
-                            checkFlag= true;
-                        }
+                        checkFlag= true;
                     }
-                    // Generate a new box at the top
-                    Boxes[0, y] = GenerateNewBox(0, y);
+                }
+                // Generate a new box at the top
+                Boxes[0, y] = GenerateNewBox(0, y);
                   
                     
                     
-                }
             }
         }
     }
-    await CheckForNewMatches();
 }
 
 IEnumerator SwapBoxesRoutine(Transform Box1, Transform Box2)
@@ -305,6 +316,7 @@ private Box GenerateNewBox(int i, int j)
     int index = Random.Range(0, IconDb.Icons.Length);
     
     newBox.Icon = IconDb.Icons[index];
+    newBox.arrow.enabled = true;
     newBox.Color = index.ToString();
 
     return newBox;
@@ -330,7 +342,7 @@ public async Task CheckForNewMatches()
             {
                 Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
                 await Task.Delay(500);
-                PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>()); // recursive call
+                await PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>()); // recursive call
                 
             }
         }
