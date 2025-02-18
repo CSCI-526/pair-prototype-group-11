@@ -158,9 +158,19 @@ public sealed class Board : MonoBehaviour
     if (Indexes.Count >= 3 || Indexes2.Count >= 3)
     {
         if (Indexes2.Count >= 3)
+        {
+            Debug.Log("calling ");
             arrowColor= box2.Color;
+            await Task.Yield();
+            arrowColor=null;
+        }
         if (Indexes.Count >= 3)    
+        {
+            Debug.Log("calling ");
             arrowColor= box1.Color;
+            await Task.Yield();
+            arrowColor=null;
+        }
        
         await Task.Delay(500);
         PopulateDestroyedBoxes(Indexes, Indexes2);
