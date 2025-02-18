@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+
+
 public class PlayerMovement : MonoBehaviour
 {
 
-
     public LayerMask obstacleLayer;
+    private GameManager gameManager;
 
     void Start()
     {
+        gameManager = FindObjectOfType<GameManager>();
         obstacleLayer = LayerMask.GetMask("Box","Wall");
+
     }
 
     void Update()
@@ -36,17 +40,21 @@ public class PlayerMovement : MonoBehaviour
                 {
                     hit.transform.position = boxTargetPosition;
                     transform.position = targetPosition;
+                    Invoke(nameof(TriggerMatchCheck), 0.1f);
+                    return;
                 }
-            }
-            if (hit.CompareTag("Wall"))
-            {
-
-
             }
         }
         else
         {
             transform.position = targetPosition;
         }
+        Invoke(nameof(TriggerMatchCheck), 0.1f);
     }
+
+    private void TriggerMatchCheck()
+    {
+        gameManager.CheckLineMatches();
+    }
+
 }
