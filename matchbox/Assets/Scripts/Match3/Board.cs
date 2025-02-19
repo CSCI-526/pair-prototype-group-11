@@ -21,8 +21,8 @@ public sealed class Board : MonoBehaviour
     [SerializeField] private float SwapTime = 0.5f;
     [SerializeField] private AudioSource MoveSource;
     [SerializeField] private AudioClip MoveSound;
-    
 
+    [SerializeField] private GameObject VFX;
     
 
 
@@ -258,6 +258,7 @@ public async Task PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List
 
         Boxes[x, y].arrow.enabled = false;
         Boxes[x, y].Color= null;
+        Instantiate(VFX, Boxes[x,y].transform.position, Quaternion.identity);
     }
 
     Task[] Tasks = new Task[no_of_cols];

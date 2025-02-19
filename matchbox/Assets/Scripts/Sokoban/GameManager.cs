@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public UnityEngine.UI.Button restartButton;
     [SerializeField] private AudioSource BoxClearSource;
     [SerializeField] private AudioClip BoxClearSound;
+    [SerializeField] private GameObject VFX;
     void Start()
     {
         if (restartButton != null)
@@ -44,6 +45,7 @@ public class GameManager : MonoBehaviour
         {
             foreach (GameObject box in toRemove)
             {
+                Instantiate(VFX, box.transform.position, Quaternion.identity);
                 Destroy(box);
             }
             Debug.Log("Boxes Removed: " + toRemove.Count);

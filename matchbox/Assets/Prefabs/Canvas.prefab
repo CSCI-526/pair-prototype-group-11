@@ -205,6 +205,7 @@ MonoBehaviour:
   SwapTime: 0.5
   MoveSource: {fileID: 2364455541300004702}
   MoveSound: {fileID: 8300000, guid: 387e1346237814bb4bfb9ddda67f9179, type: 3}
+  VFX: {fileID: 3167682389943211204, guid: 1dbc188a32ad246849c291e6e4280a50, type: 3}
 --- !u!1 &7602386345741493939
 GameObject:
   m_ObjectHideFlags: 0
