@@ -19,6 +19,9 @@ public sealed class Board : MonoBehaviour
     public AnimationCurve SwapCurve;
 
     [SerializeField] private float SwapTime = 0.5f;
+    [SerializeField] private AudioSource MoveSource;
+    [SerializeField] private AudioClip MoveSound;
+    
 
     
 
@@ -158,6 +161,7 @@ public sealed class Board : MonoBehaviour
 
     if (Indexes.Count >= 3 || Indexes2.Count >= 3)
     {
+        MoveSource.PlayOneShot(MoveSound);
         if (Indexes2.Count >= 3)
         {
             Debug.Log("calling ");
@@ -366,6 +370,7 @@ public async Task CheckForNewMatches()
                 arrowColor= rows[x].boxes[y].Color;
                 await Task.Yield();
                 arrowColor=null;
+                MoveSource.PlayOneShot(MoveSound);
         
 
                 Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);

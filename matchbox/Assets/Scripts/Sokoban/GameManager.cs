@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     private GameObject[] boxes;
     public GameObject winPanel;
     public UnityEngine.UI.Button restartButton;
+    [SerializeField] private AudioSource BoxClearSource;
+    [SerializeField] private AudioClip BoxClearSound;
     void Start()
     {
         if (restartButton != null)
@@ -80,6 +82,7 @@ public class GameManager : MonoBehaviour
 
             if (lineMatches.Count >= 3)
             {
+                BoxClearSource.PlayOneShot(BoxClearSound);
                 foreach (GameObject match in lineMatches)
                 {
                     toRemove.Add(match);
