@@ -20,14 +20,15 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W)) Move(Vector2.up);
-        if (Input.GetKeyDown(KeyCode.S)) Move(Vector2.down);
-        if (Input.GetKeyDown(KeyCode.A)) Move(Vector2.left);
-        if (Input.GetKeyDown(KeyCode.D)) Move(Vector2.right);
+        if (Board.arrowColor== "0") Move(Vector2.down);// yellow
+        if (Board.arrowColor== "1") Move(Vector2.left);//green
+        if (Board.arrowColor== "2") Move(Vector2.right);//red
+        if (Board.arrowColor== "3") Move(Vector2.up);//blue
     }
 
     public void Move(Vector2 direction)
     {
+        Debug.Log(direction);
         Vector2 targetPosition = (Vector2)transform.position + direction;
         Collider2D hit = Physics2D.OverlapBox(targetPosition, new Vector2(0.1f, 0.1f), 0f, obstacleLayer);
         if (hit)
