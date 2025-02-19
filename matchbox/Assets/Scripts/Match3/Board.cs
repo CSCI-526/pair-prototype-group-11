@@ -15,8 +15,9 @@ public sealed class Board : MonoBehaviour
     public Box[,] Boxes{get; private set;}
     public int no_of_rows => Boxes.GetLength(0);
     public int no_of_cols => Boxes.GetLength(1);
-
+    public static string arrowColor;
     public AnimationCurve SwapCurve;
+
     [SerializeField] private float SwapTime = 0.5f;
 
     
@@ -129,6 +130,7 @@ public sealed class Board : MonoBehaviour
 
     public async Task SwapBoxes(Box box1, Box box2)
 {
+    Debug.Log("Entered SwapBoxes");
 
     await BoxSwapMechanic(box1, box2); // initial swap
     MatchingAlgo.Index Index;
@@ -153,8 +155,24 @@ public sealed class Board : MonoBehaviour
         await BoxSwapMechanic(box1, box2);// swaps back if no match
     }
 
+
     if (Indexes.Count >= 3 || Indexes2.Count >= 3)
     {
+        if (Indexes2.Count >= 3)
+        {
+            Debug.Log("calling ");
+            arrowColor= box2.Color;
+            await Task.Yield();
+            arrowColor=null;
+        }
+        if (Indexes.Count >= 3)    
+        {
+            Debug.Log("calling ");
+            arrowColor= box1.Color;
+            await Task.Yield();
+            arrowColor=null;
+        }
+
         await Task.Delay(500);
         await PopulateDestroyedBoxes(Indexes, Indexes2);
     }
@@ -167,6 +185,7 @@ public sealed class Board : MonoBehaviour
 
     public async Task BoxSwapMechanic(Box box1, Box box2)
     {
+        Debug.Log("Entered BoxSwapMechanic");
     
     
     var arrow1 = box1.arrow;
@@ -183,9 +202,11 @@ public sealed class Board : MonoBehaviour
     arrow1Transform.SetParent(TopTransform);
     arrow2Transform.SetParent(TopTransform);
     
+    Debug.Log("entered SwapBoxesRoutine");
     StartCoroutine(SwapBoxesRoutine(arrow1Transform,arrow2Transform));
     int time = Convert.ToInt32(SwapTime * 1000);
     await Task.Delay(time);
+    Debug.Log("exited SwapBoxesRoutine");
     
     arrow1Transform.SetParent(box2.transform);
     arrow2Transform.SetParent(box1.transform);
@@ -340,6 +361,13 @@ public async Task CheckForNewMatches()
 
             if (isMatch && matchedIndexes.Count >= 3)
             {
+
+                Debug.Log("calling ");
+                arrowColor= rows[x].boxes[y].Color;
+                await Task.Yield();
+                arrowColor=null;
+        
+
                 Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
                 await Task.Delay(500);
                 await PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>()); // recursive call
