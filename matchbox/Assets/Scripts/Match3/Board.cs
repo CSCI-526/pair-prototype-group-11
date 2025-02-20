@@ -19,9 +19,13 @@ public sealed class Board : MonoBehaviour
     public AnimationCurve SwapCurve;
 
     [SerializeField] private float SwapTime = 0.5f;
+    [SerializeField] private AudioSource MoveSource;
+    [SerializeField] private AudioClip MoveSound;
+
     public int bubblesThreads = 0;
 
 
+    [SerializeField] private GameObject VFX;
     
 
 
@@ -132,8 +136,7 @@ public sealed class Board : MonoBehaviour
 
     public IEnumerator SwapBoxes(Box box1, Box box2)
     {
-       
-
+    
         yield return StartCoroutine(BoxSwapMechanic(box1, box2)); // initial swap
         MatchingAlgo.Index Index;
         Index.X = box1.x_coord;
@@ -160,6 +163,7 @@ public sealed class Board : MonoBehaviour
 
         if (Indexes.Count >= 3 || Indexes2.Count >= 3)
         {
+            MoveSource.PlayOneShot(MoveSound);
             if (Indexes2.Count >= 3)
             {
                 Debug.Log("calling ");
@@ -241,7 +245,6 @@ public sealed class Board : MonoBehaviour
 
 
 
-
     private IEnumerator PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
     {
       
@@ -257,6 +260,7 @@ public sealed class Board : MonoBehaviour
 
             Boxes[x, y].arrow.enabled = false;
             Boxes[x, y].Color= null;
+            Instantiate(VFX, Boxes[x,y].transform.position, Quaternion.identity);
         }
 
 
@@ -372,12 +376,12 @@ public sealed class Board : MonoBehaviour
 
                 if (isMatch && matchedIndexes.Count >= 3)
                 {
-
                     Debug.Log("calling ");
                     arrowColor= rows[x].boxes[y].Color;
                     yield return null;
                     arrowColor=null;
-            
+                    MoveSource.PlayOneShot(MoveSound);
+
 
                     Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
                     yield return new WaitForSeconds(0.5f);

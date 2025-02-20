@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
     private GameObject[] boxes;
     public GameObject winPanel;
     public UnityEngine.UI.Button restartButton;
+    [SerializeField] private AudioSource BoxClearSource;
+    [SerializeField] private AudioClip BoxClearSound;
+    [SerializeField] private GameObject VFX;
     void Start()
     {
         if (restartButton != null)
@@ -42,6 +45,7 @@ public class GameManager : MonoBehaviour
         {
             foreach (GameObject box in toRemove)
             {
+                Instantiate(VFX, box.transform.position, Quaternion.identity);
                 Destroy(box);
             }
             Debug.Log("Boxes Removed: " + toRemove.Count);
@@ -80,6 +84,7 @@ public class GameManager : MonoBehaviour
 
             if (lineMatches.Count >= 3)
             {
+                BoxClearSource.PlayOneShot(BoxClearSound);
                 foreach (GameObject match in lineMatches)
                 {
                     toRemove.Add(match);
