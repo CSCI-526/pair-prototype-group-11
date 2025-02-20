@@ -61,26 +61,35 @@ public class GameManager : MonoBehaviour
         float distance = 1.0f;
         foreach (GameObject box in boxes)
         {
+            SokobanBox boxScript = box.GetComponent<SokobanBox>();
+            if (boxScript == null) continue;
+
             Vector2 startPos = box.transform.position;
             List<GameObject> lineMatches = new List<GameObject> { box };
-            
+
             Vector2 currentPos = startPos + direction * distance;
+
             while (true)
             {
                 Collider2D hit = Physics2D.OverlapBox(currentPos, new Vector2(0.1f, 0.1f), 0, LayerMask.GetMask("Box"));
-                if (hit && !lineMatches.Contains(hit.gameObject))
+                if (hit)
                 {
-                    lineMatches.Add(hit.gameObject);
-                    currentPos += direction * distance;
+                    SokobanBox hitBox = hit.GetComponent<SokobanBox>();
+                    if (hitBox != null && hitBox.boxColor == boxScript.boxColor)
+                    {
+                        lineMatches.Add(hit.gameObject);
+                        currentPos += direction * distance;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 else
                 {
                     break;
                 }
             }
-            //Debug.Log(string.Join(", ", lineMatches.Select(box => box.name)));
-
-
 
             if (lineMatches.Count >= 3)
             {
@@ -92,6 +101,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
     private void ShowWinPanel()
     {
         Debug.Log("Win Panel Active: " + winPanel.activeSelf);
