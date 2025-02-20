@@ -29,7 +29,7 @@ public sealed class Box : MonoBehaviour, IMatchInterface
     {
         button.onClick.AddListener(() =>
             {
-                Board.Instance.SelectBox(this);
+                StartCoroutine(Board.Instance.SelectBox(this));
             }
         );
     }

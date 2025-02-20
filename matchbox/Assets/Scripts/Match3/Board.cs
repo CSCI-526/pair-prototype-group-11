@@ -22,6 +22,9 @@ public sealed class Board : MonoBehaviour
     [SerializeField] private AudioSource MoveSource;
     [SerializeField] private AudioClip MoveSound;
 
+    public int bubblesThreads = 0;
+
+
     [SerializeField] private GameObject VFX;
     
 
@@ -92,16 +95,16 @@ public sealed class Board : MonoBehaviour
 
 
     private Box _selectedBox1, _selectedBox2, tempBox2;
-    public async void SelectBox(Box box)
+    public IEnumerator SelectBox(Box box)
     {
-        if (_selectedBox1 == null && _selectedBox1!= box)
+        if (_selectedBox1 == null && _selectedBox1 != box)
         {
-            _selectedBox1= box;
-            return;
+            _selectedBox1 = box;
+            yield break;
         }
 
         // checking the box is already selected
-        if (_selectedBox2 == null && box!= _selectedBox1 )
+        if (_selectedBox2 == null && box != _selectedBox1)
         {
             tempBox2 = box;
             //checking neighbouring condition of box
@@ -111,279 +114,285 @@ public sealed class Board : MonoBehaviour
             if (x_diff + y_diff != 1)
             {
                 _selectedBox1 = tempBox2;
-                return;
+                yield break;
             }
-            
-            _selectedBox2= box;
-           
+
+            _selectedBox2 = box;
+
         }
 
 
-        if (_selectedBox1 == null || _selectedBox2 == null) return;
+        if (_selectedBox1 == null || _selectedBox2 == null) yield break;
 
-    
-        Debug.Log("Box1: " + _selectedBox1.x_coord + " " + _selectedBox1.y_coord 
+
+        Debug.Log("Box1: " + _selectedBox1.x_coord + " " + _selectedBox1.y_coord
         + " Box2: " + _selectedBox2.x_coord + " " + _selectedBox2.y_coord);
-     
-        await SwapBoxes(_selectedBox1, _selectedBox2);
+
+        yield return StartCoroutine(SwapBoxes(_selectedBox1, _selectedBox2));
         _selectedBox1 = _selectedBox2 = null;
-       
+
     }
 
 
-    public async Task SwapBoxes(Box box1, Box box2)
-{
-    Debug.Log("Entered SwapBoxes");
-
-    await BoxSwapMechanic(box1, box2); // initial swap
-    MatchingAlgo.Index Index;
-    Index.X = box1.x_coord;
-    Index.Y = box1.y_coord;
-    List<MatchingAlgo.Index> Indexes = new List<MatchingAlgo.Index>();
-    List<IMatchInterface> Boxes1 = new List<IMatchInterface>();
-
-    bool box1_Match= MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes1);
-
-    MatchingAlgo.Index Index2;
-    Index2.X = box2.x_coord;
-    Index2.Y = box2.y_coord;
-    List<MatchingAlgo.Index> Indexes2 = new List<MatchingAlgo.Index>();
-    List<IMatchInterface> Boxes2 = new List<IMatchInterface>();
-    bool box2_Match= MatchingAlgo.CheckMatch(Index2, Board.Instance.Boxes, ref Indexes2, ref Boxes2);
-    Debug.Log("Box1 Match: " + box1_Match + " Box2 Match: " + box2_Match);
-    
-    if (!box1_Match && !box2_Match)
+    public IEnumerator SwapBoxes(Box box1, Box box2)
     {
-        await Task.Delay(500);
-        await BoxSwapMechanic(box1, box2);// swaps back if no match
-    }
-
-
-    if (Indexes.Count >= 3 || Indexes2.Count >= 3)
-    {
-        MoveSource.PlayOneShot(MoveSound);
-        if (Indexes2.Count >= 3)
-        {
-            Debug.Log("calling ");
-            arrowColor= box2.Color;
-            await Task.Yield();
-            arrowColor=null;
-        }
-        if (Indexes.Count >= 3)    
-        {
-            Debug.Log("calling ");
-            arrowColor= box1.Color;
-            await Task.Yield();
-            arrowColor=null;
-        }
-
-        await Task.Delay(500);
-        await PopulateDestroyedBoxes(Indexes, Indexes2);
-    }
-
-
-
-
-    await Task.Delay(10); 
-}
-
-    public async Task BoxSwapMechanic(Box box1, Box box2)
-    {
-        Debug.Log("Entered BoxSwapMechanic");
     
-    
-    var arrow1 = box1.arrow;
-    var arrow2 = box2.arrow;
+        yield return StartCoroutine(BoxSwapMechanic(box1, box2)); // initial swap
+        MatchingAlgo.Index Index;
+        Index.X = box1.x_coord;
+        Index.Y = box1.y_coord;
+        List<MatchingAlgo.Index> Indexes = new List<MatchingAlgo.Index>();
+        List<IMatchInterface> Boxes1 = new List<IMatchInterface>();
 
-    box1.arrow = arrow2;
-    box2.arrow = arrow1;
+        bool box1_Match= MatchingAlgo.CheckMatch(Index, Board.Instance.Boxes, ref Indexes, ref Boxes1);
 
-    var arrow1Transform = arrow1.transform;
-    var arrow2Transform = arrow2.transform;
-
-    Transform TopTransform = box1.x_coord > box2.x_coord || box1.y_coord > box2.y_coord ? box1.transform : box2.transform;
-    
-    arrow1Transform.SetParent(TopTransform);
-    arrow2Transform.SetParent(TopTransform);
-    
-    Debug.Log("entered SwapBoxesRoutine");
-    StartCoroutine(SwapBoxesRoutine(arrow1Transform,arrow2Transform));
-    int time = Convert.ToInt32(SwapTime * 1000);
-    await Task.Delay(time);
-    Debug.Log("exited SwapBoxesRoutine");
-    
-    arrow1Transform.SetParent(box2.transform);
-    arrow2Transform.SetParent(box1.transform);
-  
-    /*
-    var tempPosition = arrow1Transform.position;
-    arrow1Transform.position = arrow2Transform.position;
-    arrow2Transform.position = tempPosition;
-    */
-
-    
-
-    var tempColor = box1.Color;
-    box1.Color = box2.Color;
-    box2.Color = tempColor;
-
-
-    var tempIcon = box1.Icon;
-    box1.Icon = box2.Icon;
-    box2.Icon = tempIcon;
-
-
-    Debug.Log("Swapped Boxes: " + box1.x_coord + " " + box1.y_coord +" color"+ box1.Color + " " + box2.x_coord + " " + box2.y_coord + "color"+ box2.Color);
-    
-
-
-
-
-    }
-
-
-
-
-public async Task PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
-{
-    
-
-    var allIndexes= Indexes1.Concat(Indexes2).Distinct().ToList();
-    allIndexes = allIndexes.OrderByDescending(index => index.X).ToList();
-
-    foreach (var index in allIndexes)
-    {
-        int x = index.X;
-        int y = index.Y;
-
-        Boxes[x, y].arrow.enabled = false;
-        Boxes[x, y].Color= null;
-        Instantiate(VFX, Boxes[x,y].transform.position, Quaternion.identity);
-    }
-
-    Task[] Tasks = new Task[no_of_cols];
-    
-    for (int y = 0; y < no_of_cols; y++)
-    {
-        Tasks[y] = BubbleDown(y);
-    }
-
-    await Task.WhenAll(Tasks);
-    
-    await CheckForNewMatches();
-}
-
-public async Task BubbleDown(int y)
-{
-    bool checkFlag= true;
+        MatchingAlgo.Index Index2;
+        Index2.X = box2.x_coord;
+        Index2.Y = box2.y_coord;
+        List<MatchingAlgo.Index> Indexes2 = new List<MatchingAlgo.Index>();
+        List<IMatchInterface> Boxes2 = new List<IMatchInterface>();
+        bool box2_Match= MatchingAlgo.CheckMatch(Index2, Board.Instance.Boxes, ref Indexes2, ref Boxes2);
+        Debug.Log("Box1 Match: " + box1_Match + " Box2 Match: " + box2_Match);
         
-    while(checkFlag){
-        checkFlag= false;
-        for (int x = no_of_rows - 1; x >= 0; x--)
+        if (!box1_Match && !box2_Match)
         {
-            if (Boxes[x, y].Color == null)
+            yield return null;
+            yield return StartCoroutine(BoxSwapMechanic(box1, box2));// swaps back if no match
+        }
+
+
+        if (Indexes.Count >= 3 || Indexes2.Count >= 3)
+        {
+            MoveSource.PlayOneShot(MoveSound);
+            if (Indexes2.Count >= 3)
             {
-                // Shift boxes  down
-                for (int k = x; k > 0; k--)
-                {
-                    if (Boxes[k - 1, y].Color != null)
-                    {
-                            
-                        await BoxSwapMechanic(rows[k].boxes[y], rows[k - 1].boxes[y]);
+                Debug.Log("calling ");
+                arrowColor= box2.Color;
+                yield return null;
+                arrowColor=null;
+            }
+            if (Indexes.Count >= 3)    
+            {
+                Debug.Log("calling ");
+                arrowColor= box1.Color;
+                yield return null;
+                arrowColor=null;
+            }
+
+            yield return new WaitForSeconds(0.5f);
+            yield return StartCoroutine(PopulateDestroyedBoxes(Indexes, Indexes2));
+        }
+
+
+
+
+        yield return new WaitForSeconds(1);
+    }
+
+    private IEnumerator BoxSwapMechanic(Box box1, Box box2)
+    {
+        
+        var arrow1 = box1.arrow;
+        var arrow2 = box2.arrow;
+
+        box1.arrow = arrow2;
+        box2.arrow = arrow1;
+
+        var arrow1Transform = arrow1.transform;
+        var arrow2Transform = arrow2.transform;
+
+        Transform TopTransform = box1.x_coord > box2.x_coord || box1.y_coord > box2.y_coord ? box1.transform : box2.transform;
+        
+        arrow1Transform.SetParent(TopTransform);
+        arrow2Transform.SetParent(TopTransform);
+        
+    
+        yield return StartCoroutine(SwapBoxesRoutine(arrow1Transform,arrow2Transform));
+
+
+
+        int time = Convert.ToInt32(SwapTime);
+        yield return new WaitForSeconds(time); // Convert milliseconds to seconds
+
+        arrow1Transform.SetParent(box2.transform);
+        arrow2Transform.SetParent(box1.transform);
+
+        /*
+        var tempPosition = arrow1Transform.position;
+        arrow1Transform.position = arrow2Transform.position;
+        arrow2Transform.position = tempPosition;
+        */
+
+        var tempColor = box1.Color;
+        box1.Color = box2.Color;
+        box2.Color = tempColor;
+
+
+        var tempIcon = box1.Icon;
+        box1.Icon = box2.Icon;
+        box2.Icon = tempIcon;
+
+
+        Debug.Log("Swapped Boxes: " + box1.x_coord + " " + box1.y_coord +" color"+ box1.Color + " " + box2.x_coord + " " + box2.y_coord + "color"+ box2.Color);
+        yield return null;
+    //}
+
+    }
+
+
+
+
+
+
+
+    private IEnumerator PopulateDestroyedBoxes(List<MatchingAlgo.Index> Indexes1, List<MatchingAlgo.Index> Indexes2)
+    {
+      
+        
+
+        var allIndexes= Indexes1.Concat(Indexes2).Distinct().ToList();
+        allIndexes = allIndexes.OrderByDescending(index => index.X).ToList();
+
+        foreach (var index in allIndexes)
+        {
+            int x = index.X;
+            int y = index.Y;
+
+            Boxes[x, y].arrow.enabled = false;
+            Boxes[x, y].Color= null;
+            Instantiate(VFX, Boxes[x,y].transform.position, Quaternion.identity);
+        }
+
+
+        
+        for (int y = 0; y < no_of_cols; y++)
+        {
+             StartCoroutine(BubbleDown(y));
+        }
+        
+
+        while (bubblesThreads > 0)
+        {
+            yield return null;
+        }
+    
+        Debug.Log("Starting check for new matches");
+        yield return StartCoroutine( CheckForNewMatches());
+    }
+
+    IEnumerator BubbleDown(int y)
+    {
+        bubblesThreads++;
+        bool checkFlag= true;
             
-                        checkFlag= true;
+        while(checkFlag){
+            checkFlag= false;
+            for (int x = no_of_rows - 1; x >= 0; x--)
+            {
+                if (Boxes[x, y].Color == null)
+                {
+                    // Shift boxes  down
+                    for (int k = x; k > 0; k--)
+                    {
+                        if (Boxes[k - 1, y].Color != null)
+                        {
+                                
+                            yield return StartCoroutine( BoxSwapMechanic(rows[k].boxes[y], rows[k - 1].boxes[y]));
+                
+                            checkFlag= true;
+                        }
                     }
+                    // Generate a new box at the top
+                    Boxes[0, y] = GenerateNewBox(0, y);
+                    
+                        
+                        
                 }
-                // Generate a new box at the top
-                Boxes[0, y] = GenerateNewBox(0, y);
-                  
-                    
-                    
             }
         }
+        bubblesThreads--;
     }
-}
 
-IEnumerator SwapBoxesRoutine(Transform Box1, Transform Box2)
-    {
-        float elapsedTime = 0.0f;
-        
-        Vector3 Position1 = Box1.position;
-        Vector3 Position2 = Box2.position;
-
-        Position1.z = 5;
-        Position2.z = 5;
-        
-        while (elapsedTime <= SwapTime)
+    IEnumerator SwapBoxesRoutine(Transform Box1, Transform Box2)
         {
-            Box1.position = Vector3.Lerp(Position1,Position2,SwapCurve.Evaluate(elapsedTime / SwapTime));
-            Box2.position = Vector3.Lerp(Position2,Position1,SwapCurve.Evaluate(elapsedTime / SwapTime));
+         
+            float elapsedTime = 0.0f;
             
-            elapsedTime += Time.deltaTime;
+            Vector3 Position1 = Box1.position;
+            Vector3 Position2 = Box2.position;
+
+            Position1.z = 5;
+            Position2.z = 5;
+            
+            while (elapsedTime <= SwapTime)
+            {
+                Box1.position = Vector3.Lerp(Position1,Position2,SwapCurve.Evaluate(elapsedTime / SwapTime));
+                Box2.position = Vector3.Lerp(Position2,Position1,SwapCurve.Evaluate(elapsedTime / SwapTime));
+                
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            Box1.position = Position2;
+            Box2.position = Position1;
+            
             yield return null;
         }
 
-        Box1.position = Position2;
-        Box2.position = Position1;
+    private Box GenerateNewBox(int i, int j)
+    {
+
+        var newBox = rows[i].boxes[j];
+
+        newBox.x_coord = i;
+        newBox.y_coord = j;
+
+        Debug.Log("Created New Box: " + i + " " + j);
+
+        int index = Random.Range(0, IconDb.Icons.Length);
         
-        yield return null;
+        newBox.Icon = IconDb.Icons[index];
+        newBox.arrow.enabled = true;
+        newBox.Color = index.ToString();
+
+        return newBox;
     }
 
-private Box GenerateNewBox(int i, int j)
-{
-
-    var newBox = rows[i].boxes[j];
-
-    newBox.x_coord = i;
-    newBox.y_coord = j;
-
-    Debug.Log("Created New Box: " + i + " " + j);
-
-    int index = Random.Range(0, IconDb.Icons.Length);
-    
-    newBox.Icon = IconDb.Icons[index];
-    newBox.arrow.enabled = true;
-    newBox.Color = index.ToString();
-
-    return newBox;
-}
-
-public async Task CheckForNewMatches()
-{
-
-    for (int x = no_of_rows-1; x >=0; x--)
+    IEnumerator CheckForNewMatches()
     {
-        for (int y = no_of_cols-1; y >=0; y--)
+
+        for (int x = no_of_rows-1; x >=0; x--)
         {
-            MatchingAlgo.Index index;
-            index.X = x;
-            index.Y = y;
-
-            List<MatchingAlgo.Index> matchedIndexes = new List<MatchingAlgo.Index>();
-            List<IMatchInterface> matchedBoxes = new List<IMatchInterface>();
-
-            bool isMatch = MatchingAlgo.CheckMatch(index, Board.Instance.Boxes, ref matchedIndexes, ref matchedBoxes);
-
-            if (isMatch && matchedIndexes.Count >= 3)
+            for (int y = no_of_cols-1; y >=0; y--)
             {
+                MatchingAlgo.Index index;
+                index.X = x;
+                index.Y = y;
 
-                Debug.Log("calling ");
-                arrowColor= rows[x].boxes[y].Color;
-                await Task.Yield();
-                arrowColor=null;
-                MoveSource.PlayOneShot(MoveSound);
-        
+                List<MatchingAlgo.Index> matchedIndexes = new List<MatchingAlgo.Index>();
+                List<IMatchInterface> matchedBoxes = new List<IMatchInterface>();
 
-                Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
-                await Task.Delay(500);
-                await PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>()); // recursive call
-                
+                bool isMatch = MatchingAlgo.CheckMatch(index, Board.Instance.Boxes, ref matchedIndexes, ref matchedBoxes);
+
+                if (isMatch && matchedIndexes.Count >= 3)
+                {
+                    Debug.Log("calling ");
+                    arrowColor= rows[x].boxes[y].Color;
+                    yield return null;
+                    arrowColor=null;
+                    MoveSource.PlayOneShot(MoveSound);
+
+
+                    Debug.Log("Cascade, More Matches!"+ x + " " + y+ "Coloy"+ Boxes[x,y].Color);
+                    yield return new WaitForSeconds(0.5f);
+                    yield return StartCoroutine( PopulateDestroyedBoxes(matchedIndexes, new List<MatchingAlgo.Index>())); // recursive call
+                    
+                }
             }
         }
+
+
     }
-
-
-}
 
 
 
